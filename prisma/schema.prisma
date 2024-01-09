@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/// all types
+type address {
+  street String
+  city   String
+  state  String
+  zip    String
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+// user achema
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  email     String     @unique
+  password  String?
+  name      String?
+  address   address?
+  avatar    String?
+  Product   Product[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Category  Category[]
+  role      Role       @default(USER)
+}
+
+// product category schema
+model Category {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  child     String[]
+  Product   Product[]
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String    @db.ObjectId
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// product scehema
+model Product {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  catagury   Category @relation(fields: [cataguryId], references: [id])
+  cataguryId String   @db.ObjectId
+  name       String
+  title      String
+  images     String[]
+  price      String
+  discount   String
+  size       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
